@@ -1,99 +1,148 @@
-# Hackspire (Citifix) — Local Run Instructions
+🚨 CitiFix 2.0 — Community-Driven Civic Issue Resolution Platform
 
-This repository contains a Vite + React frontend and an Express backend in the `backend/` folder.
+🔗 Live Deployment:
+👉 https://citifix21.vercel.app/
 
-**Prerequisites**
-- Node.js (>= 18 recommended)
-- npm (comes with Node.js)
+🏆 Problem Statement
 
-**Quick Start (one-time setup)**
-1. Install root and frontend dependencies:
+#Civic issues such as damaged roads, broken streetlights, water leakage, and sanitation problems often remain unresolved due to:
 
-```powershell
-cd "c:\Users\user\Pictures\hackathon\portfolio\hackspire 2.0"
-npm install
-```
+#Lack of public visibility
 
-2. Install backend dependencies:
+#No transparent escalation mechanism
 
-```powershell
-cd "c:\Users\user\Pictures\hackathon\portfolio\hackspire 2.0\backend"
-npm install
-```
+#Weak communication between citizens and authorities
 
-**Run the project**
-- Start frontend only (Vite dev server):
+#Most complaint systems fail because individual voices are ignored.
 
-```powershell
-cd "c:\Users\user\Pictures\hackathon\portfolio\hackspire 2.0"
-npm run dev
-```
+💡 Our Solution:
+#CitiFix 2.0 is a community-powered civic issue reporting platform where public participation drives accountability.
+#Issues reported by users are upvoted by the community, and once an issue gains enough public support, it is automatically escalated to authorities through social media visibility.
+🔥 At 50 community upvotes, an issue is automatically posted on X (Twitter), tagging the responsible department with full issue details and location.
 
-- Start backend only (Express):
+🚀 Key Features
+🧾 Issue Reporting
 
-```powershell
-cd "c:\Users\user\Pictures\hackathon\portfolio\hackspire 2.0\backend"
-npm start
-```
+Report civic problems with title, description, and location
 
-- Start both frontend and backend together (recommended for development):
+Clean and guided reporting flow
 
-```powershell
-cd "c:\Users\user\Pictures\hackathon\portfolio\hackspire 2.0"
-npm run dev:all
-```
+👍 Community Upvoting
 
-This uses the `concurrently` package. The frontend listens by default on port `3000` (Vite may choose an alternate port if `3000` is in use). The backend listens on port `5000` (or `process.env.PORT`).
+Transparent upvote system
 
-**Build / Preview**
-- Build frontend for production:
+Real-time progress indicator toward escalation
 
-```powershell
-npm run build
-```
+Encourages collective participation
 
-- Preview the production build:
+📣 Auto-Escalation System
 
-```powershell
-npm run preview
-```
+Issues reaching 50 upvotes are:
 
-**Environment variables**
-- The backend uses `process.env.PORT` if set. If your backend requires a database (Prisma), create a `.env` file under `backend/` containing something like:
+Automatically posted on X (Twitter)
 
-```
-PORT=5000
-DATABASE_URL="postgresql://user:pass@localhost:5432/dbname"
-```
+Department accounts are tagged
 
-Adjust the `DATABASE_URL` to your database setup. If you are not using a database locally, the backend currently responds at `/` for a health check.
+Public visibility ensures faster action
 
-**Health checks**
-- Frontend (dev): `http://localhost:3000/` (or the port Vite prints when starting, e.g. `3001`)
-- Backend: `http://localhost:5000/` (returns `Backend running successfully`)
+Each issue is posted only once to prevent spam
 
-**Troubleshooting**
-- If the frontend auto-switches ports (e.g., to `3001`) it usually means `3000` was in use. To find the process using a port on Windows:
+🔐 Secure OTP Authentication
 
-```powershell
-netstat -ano | findstr ":3000"
-```
+Email-based OTP login
 
-Then kill the process (replace `<PID>` with the number):
+No passwords stored
 
-```powershell
-taskkill /PID <PID> /F
-```
+Secure, fast, and user-friendly onboarding
 
-- If you want the frontend forced to a specific port, edit the `dev` script in `package.json` or pass `--port <port>` directly to `vite`.
+🎨 Premium Animated UI/UX
 
-**Stopping servers**
-- In any terminal running a server, press `Ctrl+C`.
+Smooth micro-interactions
 
-**Notes**
-- `dev:all` runs two commands concurrently: `npm run dev` (frontend) and `npm --prefix backend start` (backend). If one of them fails, `concurrently` will keep the others running by default; check the terminal output for details.
+Meaningful animations for state changes
 
-If you'd like, I can:
-- Automatically open the browser to the running frontend URL.
-- Add a tiny health-check script to verify both services after startup.
-- Add a `Makefile` or PowerShell script to simplify commands.
+Milestone celebration on escalation
+
+Fully responsive & accessible design
+
+🧠 Innovation & Impact
+
+What makes CitiFix different:
+
+✅ Community-driven escalation, not manual complaints
+
+✅ Event-based automation (votes → escalation)
+
+✅ Public accountability via social platforms
+
+✅ Trust-first UX with transparency
+
+This transforms civic complaints from isolated reports into collective civic movements.
+
+🛠️ Tech Stack
+Frontend
+
+React
+
+Tailwind CSS
+
+Framer Motion (animations)
+
+Mobile-first responsive design
+
+Backend
+
+Node.js
+
+Express.js
+
+REST APIs
+
+Integrations
+
+Nodemailer (OTP authentication)
+
+X (Twitter) API v4 (auto-posting)
+
+Environment-based secure configuration
+
+Deployment
+
+Vercel (Frontend)
+
+Scalable backend architecture
+
+🔄 How the Escalation Works
+
+User reports an issue
+
+Community upvotes the issue
+
+Progress bar fills toward 50 votes
+
+On reaching 50 upvotes:
+
+Issue is auto-posted on X
+
+Department is tagged
+
+Status updated to “Escalated”
+
+Community receives confirmation
+
+🎯 Why This Project Matters
+
+Encourages active citizenship
+
+Improves government accountability
+
+Reduces complaint negligence
+
+Scales naturally with community participation
+
+This platform is designed not just as a hackathon prototype, but as a real-world civic tech solution.
+
+🌐 Live Demo
+
+🔗 Try it here:
+👉 https://citifix21.vercel.app/
