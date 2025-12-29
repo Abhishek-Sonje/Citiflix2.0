@@ -15,7 +15,7 @@ import L from 'leaflet';
 import { useToast } from '@/components/ui/use-toast';
 import { Search, Filter, Clock, CheckCircle, BarChart, ThumbsUp, User, MapPin, Tag } from 'lucide-react';
 
-// Fix for default marker icon
+
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png',

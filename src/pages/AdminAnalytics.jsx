@@ -98,7 +98,7 @@ const AdminAnalytics = () => {
             <h3 className="font-bold mb-4">Daily Complaint Trends</h3>
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={trendData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#475569" /> {/* Darker grid */}
+                <CartesianGrid strokeDasharray="3 3" stroke="#475569" /> 
                 <XAxis dataKey="date" stroke="#cbd5e1" />
                 <YAxis stroke="#cbd5e1" />
                 <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: 'none', color: '#f8fafc' }} />
@@ -127,7 +127,7 @@ const AdminAnalytics = () => {
             <h3 className="font-bold mb-4">Complaints by Department</h3>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={complaintByDept}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#475569" /> {/* Darker grid */}
+                <CartesianGrid strokeDasharray="3 3" stroke="#475569" /> 
                 <XAxis dataKey="name" stroke="#cbd5e1" />
                 <YAxis stroke="#cbd5e1" />
                 <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: 'none', color: '#f8fafc' }} />

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet';
 import { motion } from 'framer-motion';
@@ -10,6 +9,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/components/ui/use-toast';
 import { saveUser } from '@/utils/storage';
 import { ArrowLeft } from 'lucide-react';
+import Beams from '../components/Background';
+import Navbar from '../components/Navbar';
 
 const RegisterPage = () => {
   const navigate = useNavigate();
@@ -61,7 +62,6 @@ const RegisterPage = () => {
   };
 
   useEffect(() => {
-    // This effect ensures that a new OTP is always ready when step 2 is shown
     if (step === 2 && !generatedOtp) {
         const mockOtp = Math.floor(100000 + Math.random() * 900000).toString();
         setGeneratedOtp(mockOtp);
@@ -75,90 +75,109 @@ const RegisterPage = () => {
   return (
     <>
       <Helmet>
-        <title>Register - CITIFIX 2.0</title>
+        <title>Register - CITIFIX</title>
         <meta name="description" content="Create your CITIFIX account and start reporting civic issues in your community." />
       </Helmet>
       
-      <div className="min-h-screen flex items-center justify-center p-4 bg-slate-900 text-slate-100">
-        <Button
-          variant="ghost"
-          className="absolute top-4 left-4 text-slate-300 hover:bg-slate-700"
-          onClick={() => navigate('/')}
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Back
-        </Button>
+      <div className="relative min-h-screen flex items-center pt-32 justify-center p-4 bg-black text-black overflow-hidden">
+        <div className="fixed inset-0 z-0">
+          <Beams
+            beamWidth={2}
+            beamHeight={15}
+            beamNumber={12}
+            lightColor="#ffffff"
+            speed={2}
+            noiseIntensity={1.75}
+            scale={0.2}
+            rotation={0}
+          />
+        </div>
+
+        <Navbar />
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="w-full max-w-md"
+          className="relative z-10 w-full max-w-md"
         >
-          <div className="bg-white rounded-2xl shadow-xl p-8 border border-slate-700">
-            <div className="flex items-center justify-center gap-2 mb-8">
+          <div className="bg-gradient-to-r from-white/20 to-white/30 rounded-3xl shadow-[0_30px_80px_-30px_rgba(255,255,255,0.25)] p-8 border border-black/10">
+            
+       
+            <div className="flex items-center justify-center gap-2 mb-6">
               <img src={logoUrl} alt="CITIFIX Logo" className="w-10 h-10 rounded-lg" />
-              <span className="text-2xl font-bold text-black">CITIFIX</span>
+              <span className="text-2xl font-bold tracking-wide text-white/90">
+                CITIFIX
+              </span>
             </div>
 
-            <h2 className="text-3xl font-bold text-center mb-2 text-black">
+            
+            <h2 className="text-3xl font-bold text-white text-center mb-2">
               {step === 1 ? 'Create Account' : 'Verify Aadhaar'}
             </h2>
-            <p className="text-slate-600 text-center mb-8">
+            <p className="text-gray-300 text-center mb-6">
               {step === 1 ? 'Join the civic movement' : 'Enter the OTP sent to your phone'}
             </p>
 
             {step === 1 ? (
               <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <Label htmlFor="name" className="font-bold text-black">Full Name</Label>
-                  <Input
-                    id="name"
-                    placeholder="Enter your name"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    required
-                  />
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="name" className="text-white">Full Name</Label>
+                    <Input
+                      id="name"
+                      placeholder="Enter your name"
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      required
+                      className="bg-white text-black border-black/20 placeholder:text-gray-400 focus:border-black focus:ring-black/10"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="email" className="text-white">Email</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="your@email.com"
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      required
+                      className="bg-white text-black border-black/20 placeholder:text-gray-400 focus:border-black focus:ring-black/10"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="phone" className="text-white">Phone Number</Label>
+                    <Input
+                      id="phone"
+                      type="tel"
+                      placeholder="+91 XXXXX XXXXX"
+                      value={formData.phone}
+                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                      required
+                      className="bg-white text-black border-black/20 placeholder:text-gray-400 focus:border-black focus:ring-black/10"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="aadhaar" className="text-white">Aadhaar Number</Label>
+                    <Input
+                      id="aadhaar"
+                      type="text"
+                      placeholder="XXXX XXXX XXXX"
+                      value={formData.aadhaar}
+                      onChange={(e) => setFormData({ ...formData, aadhaar: e.target.value })}
+                      required
+                      maxLength={12}
+                      className="bg-white text-black border-black/20 placeholder:text-gray-400 focus:border-black focus:ring-black/10"
+                    />
+                  </div>
                 </div>
 
+    
                 <div>
-                  <Label htmlFor="email" className="font-bold text-black">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="your@email.com"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    required
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="phone" className="font-bold text-black">Phone Number</Label>
-                  <Input
-                    id="phone"
-                    type="tel"
-                    placeholder="+91 XXXXX XXXXX"
-                    value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    required
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="aadhaar" className="font-bold text-black">Aadhaar Number</Label>
-                  <Input
-                    id="aadhaar"
-                    type="text"
-                    placeholder="XXXX XXXX XXXX"
-                    value={formData.aadhaar}
-                    onChange={(e) => setFormData({ ...formData, aadhaar: e.target.value })}
-                    required
-                    maxLength={12}
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="password" className="font-bold text-black">Password</Label>
+                  <Label htmlFor="password" className="text-white">Password</Label>
                   <Input
                     id="password"
                     type="password"
@@ -166,14 +185,15 @@ const RegisterPage = () => {
                     value={formData.password}
                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                     required
+                    className="bg-white text-black border-black/20 placeholder:text-gray-400 focus:border-black focus:ring-black/10"
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="role" className="font-bold text-black">Register as</Label>
+                  <Label htmlFor="role" className="text-white">Register as</Label>
                   <select
                     id="role"
-                    className="w-full px-3 py-2 border rounded-md"
+                    className="w-full px-3 py-2 border rounded-md bg-white text-black border-black/20 focus:border-black focus:ring-black/10"
                     value={formData.role}
                     onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                   >
@@ -182,14 +202,14 @@ const RegisterPage = () => {
                   </select>
                 </div>
 
-                <Button type="submit" className="w-full gradient-saffron text-white">
+                <Button type="submit" className="w-full hover:bg-white/70 hover:text-black bg-black text-white">
                   Continue
                 </Button>
               </form>
             ) : (
-              <div className="space-y-6">
+              <div className="space-y-5">
                 <div>
-                  <Label htmlFor="otp" className="font-bold text-black">Enter OTP</Label>
+                  <Label htmlFor="otp" className="text-white">Enter OTP</Label>
                   <Input
                     id="otp"
                     type="text"
@@ -197,15 +217,16 @@ const RegisterPage = () => {
                     value={otp}
                     onChange={(e) => setOtp(e.target.value)}
                     maxLength={6}
+                    className="bg-white text-black border-black/20 placeholder:text-gray-400 focus:border-black focus:ring-black/10"
                   />
-                  <p className="text-sm text-slate-500 mt-2">
+                  <p className="text-sm text-gray-300 mt-2">
                     Demo OTP: {generatedOtp}
                   </p>
                 </div>
 
                 <Button 
                   onClick={handleVerifyOtp} 
-                  className="w-full gradient-saffron text-white"
+                  className="w-full hover:bg-white/70 hover:text-black bg-black text-white"
                 >
                   Verify & Register
                 </Button>
@@ -217,18 +238,19 @@ const RegisterPage = () => {
                     setOtp('');
                     setGeneratedOtp('');
                   }}
-                  className="w-full"
+                  className="w-full bg-white/10 text-white border-white/30 hover:bg-white/20"
                 >
                   Back
                 </Button>
               </div>
             )}
 
-            <p className="text-center mt-6 text-slate-600">
+  
+            <p className="text-center mt-6 text-sm text-white">
               Already have an account?{' '}
               <button
                 onClick={() => navigate('/login')}
-                className="text-orange-600 font-semibold hover:underline"
+                className="text-white font-semibold hover:underline"
               >
                 Login
               </button>
