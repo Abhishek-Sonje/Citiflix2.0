@@ -46,16 +46,10 @@ export default function Navbar() {
               className="bg-white/30 text-white text-sm border-white/20 hover:bg-white/15 inline-flex items-center gap-2"
               onClick={() => navigate("/login")}
             >
-              <User className="h-5 w-5" /> Citizen Login
+              <User className="h-5 w-5" /> Login
             </Button>
 
-            <Button
-              variant="outline"
-              className="bg-white/30 text-white text-sm border-white/20 hover:bg-white/15 inline-flex items-center gap-2"
-              onClick={() => navigate("/login")}
-            >
-              <UserCog className="h-5 w-5" /> Admin Login
-            </Button>
+           
 
             <Button
               className="bg-white/90 hover:bg-white/20 border border-white hover:text-white text-black/90 rounded-3xl text-sm px-6"
@@ -82,17 +76,9 @@ export default function Navbar() {
               className="w-full bg-white/30 text-white border-white/20  inline-flex items-center gap-2 hover:bg-white/15"
               onClick={() => navigate("/login")}
             >
-              <User className="h-6 w-6" /> Citizen Login
+              <User className="h-6 w-6" /> Login
             </Button>
 
-            <Button
-              variant="outline"
-              className="w-full bg-white/30 text-white border-white/20 inline-flex items-center gap-2 hover:bg-white/15"
-              onClick={() => navigate("/login")}
-            >
-              <UserCog className="h-6 w-6" />
-              Admin Login
-            </Button>
 
             <Button
               className="w-full bg-white/90 hover:bg-white/20 border border-white hover:text-white text-black/90 rounded-3xl"

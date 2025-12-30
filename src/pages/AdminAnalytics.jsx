@@ -1,13 +1,39 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Helmet } from 'react-helmet';
+import { motion } from 'framer-motion';
 import DashboardLayout from '@/components/DashboardLayout.jsx';
 import { getComplaints, getUsers } from '@/utils/storage.js';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Award, Clock, CheckCircle, BarChart as BarChartIcon } from 'lucide-react';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  LineChart,
+  Line
+} from 'recharts';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
+import {
+  Award,
+  Clock,
+  CheckCircle,
+  BarChart as BarChartIcon,
+  TrendingUp
+} from 'lucide-react';
 
-const COLORS = ['#FF9933', '#138808', '#000080', '#FF7700', '#0A5504', '#87CEEB'];
+const COLORS = ['#ffffff', '#e5e5e5', '#cccccc', '#b3b3b3', '#999999', '#808080'];
 const DEPARTMENTS = ['Roads', 'Water', 'Waste', 'Electricity', 'Parks', 'Traffic', 'Other'];
 
 const AdminAnalytics = () => {
@@ -15,39 +41,71 @@ const AdminAnalytics = () => {
   const [users, setUsers] = useState([]);
   const [departmentFilter, setDepartmentFilter] = useState('all');
 
+  /* -------------------- LOAD & SANITIZE DATA -------------------- */
   useEffect(() => {
-    setComplaints(getComplaints());
-    const allUsers = getUsers();
-    setUsers(allUsers.sort((a, b) => (b.rewardPoints || 0) - (a.rewardPoints || 0)).slice(0, 5));
+    const loadedComplaints = getComplaints() || [];
+    const loadedUsers = getUsers() || [];
+
+    setComplaints(
+      loadedComplaints.filter(
+        c => c && c.category && c.status && c.createdAt
+      )
+    );
+
+    setUsers(
+      loadedUsers
+        .sort((a, b) => (b.rewardPoints || 0) - (a.rewardPoints || 0))
+        .slice(0, 5)
+    );
   }, []);
 
-  const filteredComplaints = departmentFilter === 'all' 
-    ? complaints 
-    : complaints.filter(c => c.category === departmentFilter);
+  /* -------------------- FILTERED COMPLAINTS -------------------- */
+  const filteredComplaints = useMemo(() => {
+    return departmentFilter === 'all'
+      ? complaints
+      : complaints.filter(c => c.category === departmentFilter);
+  }, [complaints, departmentFilter]);
 
-  const complaintByDept = DEPARTMENTS.map(dep => ({
-    name: dep,
-    count: complaints.filter(c => c.category === dep).length
-  }));
-
-  const statusCounts = {
+  /* -------------------- STATUS COUNTS -------------------- */
+  const statusCounts = useMemo(() => ({
     open: filteredComplaints.filter(c => c.status === 'open').length,
     assigned: filteredComplaints.filter(c => c.status === 'assigned').length,
-    resolved: filteredComplaints.filter(c => c.status === 'resolved').length,
-  };
+    resolved: filteredComplaints.filter(c => c.status === 'resolved').length
+  }), [filteredComplaints]);
 
-  const trendData = filteredComplaints
-    .reduce((acc, c) => {
-      const date = new Date(c.createdAt).toISOString().split('T')[0];
-      const entry = acc.find(item => item.date === date);
-      if (entry) {
-        entry.count++;
-      } else {
-        acc.push({ date, count: 1 });
-      }
-      return acc;
-    }, [])
-    .sort((a, b) => new Date(a.date) - new Date(b.date));
+  /* -------------------- TREND DATA (SAFE) -------------------- */
+  const trendData = useMemo(() => {
+    const map = {};
+
+    filteredComplaints.forEach(c => {
+      const dateObj = new Date(c.createdAt);
+      if (isNaN(dateObj)) return;
+
+      const date = dateObj.toISOString().split('T')[0];
+      map[date] = map[date]
+        ? { date, count: map[date].count + 1 }
+        : { date, count: 1 };
+    });
+
+    return Object.values(map).sort(
+      (a, b) => new Date(a.date) - new Date(b.date)
+    );
+  }, [filteredComplaints]);
+
+  /* -------------------- COMPLAINTS BY DEPARTMENT -------------------- */
+  const complaintByDept = useMemo(() => {
+    return DEPARTMENTS.map(dep => ({
+      name: dep,
+      count: filteredComplaints.filter(c => c.category === dep).length || 0
+    }));
+  }, [filteredComplaints]);
+
+  /* -------------------- STATS -------------------- */
+  const stats = [
+    { icon: Clock, label: 'Open Issues', value: statusCounts.open },
+    { icon: BarChartIcon, label: 'Assigned Issues', value: statusCounts.assigned },
+    { icon: CheckCircle, label: 'Resolved Issues', value: statusCounts.resolved }
+  ];
 
   return (
     <>
@@ -55,99 +113,152 @@ const AdminAnalytics = () => {
         <title>Analytics - CITIFIX</title>
         <meta name="description" content="View real-time analytics for civic issues." />
       </Helmet>
+
       <DashboardLayout>
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold">Analytics Dashboard</h1>
-          <Select value={departmentFilter} onValueChange={setDepartmentFilter}>
-            <SelectTrigger className="w-[220px] bg-slate-800 text-slate-100 border-slate-700">
-              <SelectValue placeholder="Filter by Department" />
-            </SelectTrigger>
-            <SelectContent className="bg-slate-800 border-slate-700 text-slate-100">
-              <SelectItem value="all">All Departments</SelectItem>
-              {DEPARTMENTS.map(dep => <SelectItem key={dep} value={dep}>{dep}</SelectItem>)}
-            </SelectContent>
-          </Select>
-        </div>
+        <div className="space-y-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center backdrop-blur-sm border border-white/20">
+                <TrendingUp className="w-8 h-8 text-white" />
+              </div>
+              <div>
+                <h1 className="text-3xl sm:text-4xl font-bold text-white">
+                  Analytics Dashboard
+                </h1>
+                <p className="text-white/60 mt-1">Real-time insights and trends</p>
+              </div>
+            </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-          <div className="bg-slate-800 p-6 rounded-xl shadow-lg flex items-center gap-4">
-            <div className="p-3 bg-blue-700 rounded-lg"><Clock className="w-6 h-6 text-white"/></div>
-            <div>
-              <p className="text-slate-300">Open Issues</p>
-              <p className="text-3xl font-bold">{statusCounts.open}</p>
+            <Select value={departmentFilter} onValueChange={setDepartmentFilter}>
+              <SelectTrigger className="w-[220px] bg-white/10 text-white border-white/20 backdrop-blur-sm hover:bg-white/15">
+                <SelectValue placeholder="Filter by Department" />
+              </SelectTrigger>
+              <SelectContent className="bg-gradient-to-br from-white/20 to-white/10 backdrop-blur-xl border-white/20 text-white">
+                <SelectItem value="all">All Departments</SelectItem>
+                {DEPARTMENTS.map(dep => (
+                  <SelectItem key={dep} value={dep}>
+                    {dep}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {stats.map((stat, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+                className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-6 shadow-lg border border-white/10"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center border border-white/20">
+                    <stat.icon className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-white/60 text-sm">{stat.label}</p>
+                    <p className="text-3xl font-bold text-white">{stat.value}</p>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+
+          <div className="grid lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/10">
+              <h3 className="font-bold text-xl text-white mb-4">
+                Daily Complaint Trends
+              </h3>
+
+              {trendData.length > 0 && (
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={trendData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                    <XAxis dataKey="date" stroke="rgba(255,255,255,0.6)" />
+                    <YAxis stroke="rgba(255,255,255,0.6)" />
+                    <Tooltip />
+                    <Legend />
+                    <Line
+                      type="monotone"
+                      dataKey="count"
+                      stroke="#ffffff"
+                      strokeWidth={3}
+                      dot={{ r: 4 }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              )}
+            </div>
+
+            <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/10">
+              <h3 className="font-bold text-xl text-white mb-4">Top Citizens</h3>
+              <div className="space-y-3">
+                {users.map((user, index) => (
+                  <div
+                    key={user.id}
+                    className="flex justify-between items-center p-3 bg-white/5 rounded-xl border border-white/10"
+                  >
+                    <span className="text-white font-medium">
+                      {index + 1}. {user.name}
+                    </span>
+                    <span className="text-white font-bold flex items-center gap-1">
+                      <Award className="w-4 h-4" />
+                      {user.rewardPoints || 0}
+                    </span>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
-          <div className="bg-slate-800 p-6 rounded-xl shadow-lg flex items-center gap-4">
-            <div className="p-3 bg-yellow-700 rounded-lg"><BarChartIcon className="w-6 h-6 text-white"/></div>
-            <div>
-              <p className="text-slate-300">Assigned Issues</p>
-              <p className="text-3xl font-bold">{statusCounts.assigned}</p>
-            </div>
-          </div>
-          <div className="bg-slate-800 p-6 rounded-xl shadow-lg flex items-center gap-4">
-            <div className="p-3 bg-green-700 rounded-lg"><CheckCircle className="w-6 h-6 text-white"/></div>
-            <div>
-              <p className="text-slate-300">Resolved Issues</p>
-              <p className="text-3xl font-bold">{statusCounts.resolved}</p>
-            </div>
-          </div>
-        </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 bg-slate-800 p-6 rounded-xl shadow-lg">
-            <h3 className="font-bold mb-4">Daily Complaint Trends</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={trendData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#475569" /> 
-                <XAxis dataKey="date" stroke="#cbd5e1" />
-                <YAxis stroke="#cbd5e1" />
-                <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: 'none', color: '#f8fafc' }} />
-                <Legend />
-                <Line type="monotone" dataKey="count" name="New Complaints" stroke="#FF9933" strokeWidth={2} />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-          <div className="bg-slate-800 p-6 rounded-xl shadow-lg">
-            <h3 className="font-bold mb-4">Top Citizens</h3>
-            <ul className="space-y-3">
-              {users.map(user => (
-                <li key={user.id} className="flex justify-between items-center text-slate-300">
-                  <span>{user.name}</span>
-                  <span className="font-bold flex items-center gap-1 text-orange-500">
-                    <Award className="w-4 h-4"/> {user.rewardPoints || 0}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
+          <div className="grid lg:grid-cols-5 gap-6">
+            <div className="lg:col-span-3 bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/10">
+              <h3 className="font-bold text-xl text-white mb-4">
+                Complaints by Department
+              </h3>
 
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 mt-6">
-          <div className="lg:col-span-3 bg-slate-800 p-6 rounded-xl shadow-lg">
-            <h3 className="font-bold mb-4">Complaints by Department</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={complaintByDept}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#475569" /> 
-                <XAxis dataKey="name" stroke="#cbd5e1" />
-                <YAxis stroke="#cbd5e1" />
-                <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: 'none', color: '#f8fafc' }} />
-                <Legend />
-                <Bar dataKey="count" name="Complaints" fill="#138808" />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-          <div className="lg:col-span-2 bg-slate-800 p-6 rounded-xl shadow-lg">
-            <h3 className="font-bold mb-4">Department Distribution</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie data={complaintByDept} dataKey="count" nameKey="name" cx="50%" cy="50%" outerRadius={100} label>
-                  {complaintByDept.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip contentStyle={{ backgroundColor: '#1e293b', border: 'none', color: '#f8fafc' }} />
-              </PieChart>
-            </ResponsiveContainer>
+              {complaintByDept.some(d => d.count > 0) && (
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={complaintByDept}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="count" fill="#ffffff" radius={[8, 8, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
+            </div>
+
+            <div className="lg:col-span-2 bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/10">
+              <h3 className="font-bold text-xl text-white mb-4">
+                Department Distribution
+              </h3>
+
+              {complaintByDept.some(d => d.count > 0) && (
+                <ResponsiveContainer width="100%" height={300}>
+                  <PieChart>
+                    <Pie
+                      data={complaintByDept}
+                      dataKey="count"
+                      nameKey="name"
+                      outerRadius={90}
+                      label={({ name, percent }) =>
+                        percent > 0 ? `${name} ${(percent * 100).toFixed(0)}%` : ''
+                      }
+                    >
+                      {complaintByDept.map((_, i) => (
+                        <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              )}
+            </div>
           </div>
         </div>
       </DashboardLayout>
