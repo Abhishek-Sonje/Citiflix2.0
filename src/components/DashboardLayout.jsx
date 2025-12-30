@@ -1,9 +1,9 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { motion } from 'framer-motion';
-import { Home, FileText, Users, Award, LogOut, Shield, BarChart2, Map } from 'lucide-react';
+import { Home, FileText, Users, Award, LogOut, Shield, BarChart2, Map, Menu, X } from 'lucide-react';
+import Beams from '../components/Background';
 
 const commonLinks = [
   { to: '/community', icon: Users, label: 'Community' },
@@ -21,28 +21,29 @@ const adminLinks = [
   { to: '/admin/map', icon: Map, label: 'Map View' },
 ];
 
-const SidebarLink = ({ to, icon: Icon, label }) => (
+const SidebarLink = ({ to, icon: Icon, label, onClick }) => (
   <NavLink
     to={to}
     end={to === '/admin'}
+    onClick={onClick}
     className={({ isActive }) =>
-      `flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+      `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 ${
         isActive
-          ? 'bg-orange-600 text-white shadow-md'
-          : 'text-slate-300 hover:bg-slate-700 hover:text-orange-300'
+          ? 'bg-white/20 text-white shadow-lg backdrop-blur-sm border border-white/30'
+          : 'text-white/70 hover:bg-white/10 hover:text-white backdrop-blur-sm border border-transparent hover:border-white/20'
       }`
     }
   >
     <Icon className="w-5 h-5" />
-    <span>{label}</span>
+    <span className="font-medium">{label}</span>
   </NavLink>
 );
 
 const DashboardLayout = ({ children }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const logoUrl = "https://horizons-cdn.hostinger.com/a6afdcf9-aaa7-4281-ba79-be0f31c772d0/384adb0a13bc13709264589f14f2ae52.jpg";
-
 
   const handleLogout = () => {
     logout();
@@ -52,36 +53,122 @@ const DashboardLayout = ({ children }) => {
   const links = user.role === 'admin' ? adminLinks : citizenLinks;
 
   return (
-    <div className="flex min-h-screen bg-slate-900 text-slate-100">
-      <aside className="w-64 bg-slate-800 border-r border-slate-700 p-4 flex-col justify-between hidden lg:flex">
+    <div className="relative flex min-h-screen bg-black text-white overflow-hidden">
+ 
+      <div className="fixed inset-0 z-0">
+        <Beams
+          beamWidth={2}
+          beamHeight={15}
+          beamNumber={12}
+          lightColor="#ffffff"
+          speed={2}
+          noiseIntensity={1.75}
+          scale={0.2}
+          rotation={0}
+        />
+      </div>
+
+
+      {!sidebarOpen && (
+  <button
+    onClick={() => setSidebarOpen(true)}
+    className="lg:hidden fixed top-4 left-4 z-50 p-3 bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl text-white hover:bg-white/20 transition-all"
+  >
+    <Menu className="w-6 h-6" />
+  </button>
+)}
+
+
+    
+      <aside
+        className={`
+          fixed lg:relative inset-y-0 left-0 z-40
+          w-72 bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-2xl
+          border-r border-white/10 p-6
+          flex flex-col justify-between
+          transform transition-transform duration-300 ease-in-out
+          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+          shadow-[0_8px_32px_0_rgba(255,255,255,0.1)]
+        `}
+      >
         <div>
-          <div className="flex items-center gap-2 mb-8 p-3">
-            <img src={logoUrl} alt="CITIFIX Logo" className="w-10 h-10 rounded-lg" />
-            <span className="text-xl font-bold text-slate-100">CITIFIX</span>
+          <div className="lg:hidden absolute top-4 right-4 z-50">
+  <button
+    onClick={() => setSidebarOpen(false)}
+    className="p-3 bg-white/10 backdrop-blur-xl border border-white/20 rounded-xl text-white hover:bg-white/20 transition-all"
+  >
+    <X className="w-6 h-6" />
+  </button>
+</div>
+
+          <div className="flex items-center gap-3 mb-10 p-3 bg-white/5 rounded-2xl backdrop-blur-sm border border-white/10">
+            <img src={logoUrl} alt="CITIFIX Logo" className="w-11 h-11 rounded-xl shadow-lg" />
+            <div>
+              <span className="text-xl font-bold text-white block">CITIFIX</span>
+              <span className="text-xs text-white/60">{user.role === 'admin' ? 'Admin Panel' : 'Citizen Portal'}</span>
+            </div>
           </div>
+
+          <div className="mb-8 p-4 bg-white/5 rounded-2xl backdrop-blur-sm border border-white/10">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-gradient-to-br from-white/20 to-white/10 rounded-full flex items-center justify-center text-white font-bold text-lg border border-white/20">
+                {user.name.charAt(0).toUpperCase()}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-white font-semibold truncate">{user.name}</p>
+                <p className="text-white/60 text-sm truncate">{user.email}</p>
+              </div>
+            </div>
+          </div>
+
           <nav className="space-y-2">
-            {links.map(link => <SidebarLink key={link.to} {...link} />)}
-            <div className="pt-4 mt-4 border-t border-slate-700">
-              {commonLinks.map(link => <SidebarLink key={link.to} {...link} />)}
+            {links.map(link => (
+              <SidebarLink 
+                key={link.to} 
+                {...link} 
+                onClick={() => setSidebarOpen(false)}
+              />
+            ))}
+            <div className="pt-4 mt-4 border-t border-white/10 space-y-2">
+              {commonLinks.map(link => (
+                <SidebarLink 
+                  key={link.to} 
+                  {...link}
+                  onClick={() => setSidebarOpen(false)}
+                />
+              ))}
             </div>
           </nav>
         </div>
+
         <button
           onClick={handleLogout}
-          className="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-300 hover:bg-red-700 hover:text-white transition-colors"
+          className="flex items-center gap-3 px-4 py-3 rounded-xl text-white/70 hover:bg-red-500/20 hover:text-white transition-all duration-300 backdrop-blur-sm border border-transparent hover:border-red-500/30 group"
         >
-          <LogOut className="w-5 h-5" />
-          <span>Logout</span>
+          <LogOut className="w-5 h-5 group-hover:rotate-12 transition-transform" />
+          <span className="font-medium">Logout</span>
         </button>
       </aside>
 
-      <main className="flex-1 p-4 sm:p-6 lg:p-8">
+      {sidebarOpen && (
+        <div
+          className="lg:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-30"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+     <main className="relative flex-1 pt-20 sm:pt-6 lg:pt-8 p-4 overflow-auto z-10">
+
+
         <motion.div
-          initial={{ opacity: 0, y: 15 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
+          transition={{ duration: 0.6 }}
+          className="max-w-7xl mx-auto"
         >
-          {children}
+          <div className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-3xl border border-white/10 shadow-[0_8px_32px_0_rgba(255,255,255,0.1)] p-6 sm:p-8 min-h-[calc(100vh-8rem)]">
+            {children}
+          </div>
         </motion.div>
       </main>
     </div>
